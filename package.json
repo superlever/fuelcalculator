@@ -4,9 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "npx wrangler pages dev . --port 8080",
-    "deploy": "npx wrangler pages deploy . --project-name=fuel-calculator-au"
-  },
-  "devDependencies": {
-    "wrangler": "^3.99.0"
+    "build": "echo 'No build step needed - static site'"
   }
 }

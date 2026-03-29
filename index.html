@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fuel Price Rise & WFH Savings Calculator | Australia</title>
+  <meta name="description" content="Calculate how much more you're paying for fuel since the Iran conflict price rises, and how much you'd save by working from home.">
+  <meta property="og:title" content="Australian Fuel Price Rise & WFH Savings Calculator">
+  <meta property="og:description" content="See the real cost of fuel increases and how much working from home could save you.">
+  <meta property="og:type" content="website">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fafaf9;
+      --surface: #ffffff;
+      --text: #1c1917;
+      --text-muted: #78716c;
+      --border: #e7e5e4;
+      --primary: #ea580c;
+      --primary-light: #fff7ed;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --red-border: #fecaca;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --green-border: #bbf7d0;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 940px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+      color: white;
+      padding: 32px 0;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      font-size: 1rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    main { padding: 32px 0 64px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Inputs Section */
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .input-group label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .input-group .hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .input-group select,
+    .input-group input[type="number"] {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%;
+    }
+
+    .input-group select:focus,
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+    }
+
+    .checkbox-group {
+      flex-direction: row !important;
+      align-items: center;
+      gap: 8px !important;
+      padding-top: 28px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .checkbox-group label {
+      font-size: 0.9rem;
+    }
+
+    .input-row-full {
+      grid-column: 1 / -1;
+    }
+
+    .fuel-type-toggle {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .fuel-type-toggle label {
+      flex: 1;
+      text-align: center;
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--surface);
+      border: none;
+    }
+
+    .fuel-type-toggle input[type="radio"] {
+      display: none;
+    }
+
+    .fuel-type-toggle input[type="radio"]:checked + label {
+      background: var(--primary);
+      color: white;
+    }
+
+    .price-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .price-input-wrapper {
+      position: relative;
+    }
+
+    .price-input-wrapper .unit {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .price-input-wrapper input {
+      padding-right: 40px;
+    }
+
+    /* Hero Stats */
+    .hero-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .hero-stat {
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .hero-stat.cost-increase {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: white;
+    }
+
+    .hero-stat.wfh-savings {
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      color: white;
+    }
+
+    .hero-stat .hero-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.9;
+      margin-bottom: 4px;
+    }
+
+    .hero-stat .hero-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .hero-stat .hero-sub {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+
+    .hero-stat.wfh-savings.no-extra-wfh {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    }
+
+    /* Comparison Cards */
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .compare-card {
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .compare-card.before {
+      border-left: 4px solid var(--blue);
+    }
+
+    .compare-card.after {
+      border-left: 4px solid var(--red);
+    }
+
+    .compare-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .compare-card .price-tag {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .compare-card .cost-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    .compare-card .cost-row:last-child {
+      border-bottom: none;
+      font-weight: 700;
+      font-size: 1rem;
+      padding-top: 12px;
+    }
+
+    .compare-card .cost-row .label { color: var(--text-muted); }
+    .compare-card .cost-row .value { font-weight: 600; }
+
+    /* Bar Chart */
+    .chart-section {
+      margin-top: 24px;
+    }
+
+    .chart-section .card { padding: 24px; }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .bar-row:last-child { margin-bottom: 0; }
+
+    .bar-label {
+      flex: 0 0 160px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-align: right;
+      color: var(--text-muted);
+    }
+
+    .bar-track {
+      flex: 1;
+      background: #f5f5f4;
+      border-radius: 6px;
+      height: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.4s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: white;
+      min-width: 60px;
+    }
+
+    .bar-fill.feb { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
+    .bar-fill.now { background: linear-gradient(90deg, #f87171, #dc2626); }
+    .bar-fill.wfh { background: linear-gradient(90deg, #4ade80, #16a34a); }
+
+    .bar-value-outside {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-left: 8px;
+      flex: 0 0 70px;
+    }
+
+    /* Summary Table */
+    .summary-section { margin-top: 24px; }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .summary-table th {
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .summary-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .summary-table tr:last-child td { border-bottom: none; }
+
+    .summary-table .increase { color: var(--red); font-weight: 600; }
+    .summary-table .savings { color: var(--green); font-weight: 600; }
+
+    /* WFH Scenario section */
+    .wfh-scenario {
+      margin-top: 24px;
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .wfh-scenario h3 {
+      color: var(--green);
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .wfh-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .wfh-item {
+      text-align: center;
+    }
+
+    .wfh-item .wfh-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .wfh-item .wfh-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--green);
+    }
+
+    .wfh-item .wfh-detail {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    footer {
+      padding: 24px 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header h1 { font-size: 1.35rem; }
+      header p { font-size: 0.9rem; }
+
+      .inputs-grid { grid-template-columns: 1fr; }
+      .hero-stats { grid-template-columns: 1fr; }
+      .comparison { grid-template-columns: 1fr; }
+      .wfh-grid { grid-template-columns: 1fr; gap: 8px; }
+
+      .hero-stat .hero-value { font-size: 1.75rem; }
+
+      .checkbox-group { padding-top: 0; }
+
+      .bar-label { flex: 0 0 100px; font-size: 0.7rem; }
+      .bar-value-outside { flex: 0 0 60px; font-size: 0.75rem; }
+
+      .summary-table { font-size: 0.8rem; }
+      .summary-table th, .summary-table td { padding: 8px 6px; }
+    }
+
+    @media (max-width: 480px) {
+      header { padding: 24px 0; }
+      main { padding: 20px 0 48px; }
+      .card { padding: 16px; }
+      .bar-label { flex: 0 0 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>Fuel Price Rise & WFH Savings Calculator</h1>
+    <p>See how much more you're paying for fuel since the price rises &mdash; and how much working from home could save you.</p>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- INPUTS -->
+    <div class="card">
+      <div class="section-title">Your Details</div>
+      <div class="inputs-grid">
+
+        <div class="input-group">
+          <label for="state">State</label>
+          <select id="state">
+            <option value="NSW">New South Wales</option>
+            <option value="VIC">Victoria</option>
+            <option value="QLD">Queensland</option>
+            <option value="SA">South Australia</option>
+            <option value="WA">Western Australia</option>
+            <option value="TAS">Tasmania</option>
+            <option value="NT">Northern Territory</option>
+            <option value="ACT">Australian Capital Territory</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Fuel Type</label>
+          <div class="fuel-type-toggle">
+            <input type="radio" name="fuelType" id="fuelUnleaded" value="unleaded" checked>
+            <label for="fuelUnleaded">Unleaded</label>
+            <input type="radio" name="fuelType" id="fuelDiesel" value="diesel">
+            <label for="fuelDiesel">Diesel</label>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="carSize">Car Size</label>
+          <select id="carSize">
+            <option value="small">Small car (6.5 L/100km)</option>
+            <option value="medium" selected>Medium sedan (7.5 L/100km)</option>
+            <option value="large">Large sedan (9.5 L/100km)</option>
+            <option value="suv">SUV (9.5 L/100km)</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="distance">Distance to Work (km, one way)</label>
+          <input type="number" id="distance" min="1" max="500" step="1" value="28">
+        </div>
+
+        <div class="input-group checkbox-group">
+          <input type="checkbox" id="bothWays" checked>
+          <label for="bothWays">Return trip (both ways)</label>
+        </div>
+
+        <div class="input-group">
+          <label for="daysWorking">Days Working Per Week</label>
+          <select id="daysWorking">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5" selected>5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="wfhNormal">Days WFH Normally</label>
+          <span class="hint">How many days you currently work from home</span>
+          <select id="wfhNormal">
+            <option value="0" selected>0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="wfhExtra">Extra WFH Days (Proposed)</label>
+          <span class="hint">Additional days you'd like to work from home</span>
+          <select id="wfhExtra">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Fuel Prices -->
+      <div class="price-inputs">
+        <div class="input-group">
+          <label for="febPrice">February 2025 Price</label>
+          <span class="hint">Average price before the rises</span>
+          <div class="price-input-wrapper">
+            <input type="number" id="febPrice" min="50" max="500" step="0.1" value="175">
+            <span class="unit">c/L</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="currentPrice">Current Price (March 2026)</label>
+          <span class="hint">Today's approximate price</span>
+          <div class="price-input-wrapper">
+            <input type="number" id="currentPrice" min="50" max="500" step="0.1" value="244">
+            <span class="unit">c/L</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO STATS -->
+    <div class="hero-stats" aria-live="polite">
+      <div class="hero-stat cost-increase">
+        <div class="hero-label">Fuel Price Rises Cost You</div>
+        <div class="hero-value" id="heroIncrease">$0</div>
+        <div class="hero-sub">more per month</div>
+      </div>
+      <div class="hero-stat wfh-savings" id="heroSavingsCard">
+        <div class="hero-label" id="heroSavingsLabel">WFH 2 Extra Days Saves</div>
+        <div class="hero-value" id="heroSavings">$0</div>
+        <div class="hero-sub" id="heroSavingsSub">per month</div>
+      </div>
+    </div>
+
+    <!-- COMPARISON CARDS -->
+    <div class="comparison">
+      <div class="compare-card before">
+        <h3>February 2025</h3>
+        <div class="price-tag" id="febPriceTag">175.0 c/L Unleaded</div>
+        <div class="cost-row"><span class="label">Daily commute</span><span class="value" id="febDaily">$0</span></div>
+        <div class="cost-row"><span class="label">Weekly</span><span class="value" id="febWeekly">$0</span></div>
+        <div class="cost-row"><span class="label">Monthly</span><span class="value" id="febMonthly">$0</span></div>
+      </div>
+      <div class="compare-card after">
+        <h3>March 2026 (Now)</h3>
+        <div class="price-tag" id="currentPriceTag">244.0 c/L Unleaded</div>
+        <div class="cost-row"><span class="label">Daily commute</span><span class="value" id="nowDaily">$0</span></div>
+        <div class="cost-row"><span class="label">Weekly</span><span class="value" id="nowWeekly">$0</span></div>
+        <div class="cost-row"><span class="label">Monthly</span><span class="value" id="nowMonthly">$0</span></div>
+      </div>
+    </div>
+
+    <!-- WFH SCENARIO -->
+    <div class="wfh-scenario" id="wfhScenario">
+      <h3 id="wfhTitle">If You Worked From Home 2 Extra Days Per Week</h3>
+      <div class="wfh-grid">
+        <div class="wfh-item">
+          <div class="wfh-label">Weekly Saving</div>
+          <div class="wfh-value" id="wfhWeekly">$0</div>
+          <div class="wfh-detail" id="wfhWeeklyDetail"></div>
+        </div>
+        <div class="wfh-item">
+          <div class="wfh-label">Monthly Saving</div>
+          <div class="wfh-value" id="wfhMonthly">$0</div>
+          <div class="wfh-detail" id="wfhMonthlyDetail"></div>
+        </div>
+        <div class="wfh-item">
+          <div class="wfh-label">Annual Saving</div>
+          <div class="wfh-value" id="wfhAnnual">$0</div>
+          <div class="wfh-detail" id="wfhAnnualDetail"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BAR CHART -->
+    <div class="chart-section">
+      <div class="card">
+        <div class="section-title">Monthly Cost Comparison</div>
+        <div id="chartBars"></div>
+      </div>
+    </div>
+
+    <!-- SUMMARY TABLE -->
+    <div class="summary-section">
+      <div class="card">
+        <div class="section-title">Full Breakdown</div>
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Daily</th>
+              <th>Weekly</th>
+              <th>Monthly</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Feb 2025 (commuting)</td>
+              <td id="tFebDaily">$0</td>
+              <td id="tFebWeekly">$0</td>
+              <td id="tFebMonthly">$0</td>
+            </tr>
+            <tr>
+              <td>Now (commuting)</td>
+              <td id="tNowDaily">$0</td>
+              <td id="tNowWeekly">$0</td>
+              <td id="tNowMonthly">$0</td>
+            </tr>
+            <tr>
+              <td>Price rise increase</td>
+              <td class="increase" id="tIncDaily">+$0</td>
+              <td class="increase" id="tIncWeekly">+$0</td>
+              <td class="increase" id="tIncMonthly">+$0</td>
+            </tr>
+            <tr>
+              <td>Now (with extra WFH)</td>
+              <td id="tWfhDaily">&mdash;</td>
+              <td id="tWfhWeekly">$0</td>
+              <td id="tWfhMonthly">$0</td>
+            </tr>
+            <tr>
+              <td>WFH savings</td>
+              <td class="savings" id="tSavDaily">&mdash;</td>
+              <td class="savings" id="tSavWeekly">-$0</td>
+              <td class="savings" id="tSavMonthly">-$0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>Fuel prices are approximate averages. Actual prices vary by location and retailer. Consumption figures are estimates based on average vehicle efficiency.</p>
+  </div>
+</footer>
+
+<script>
+  // === DATA ===
+  const FUEL_PRICES = {
+    feb2025: {
+      unleaded: { NSW: 175, VIC: 178, QLD: 172, SA: 176, WA: 170, TAS: 180, NT: 185, ACT: 177 },
+      diesel:   { NSW: 183, VIC: 186, QLD: 180, SA: 184, WA: 178, TAS: 188, NT: 193, ACT: 185 }
+    },
+    current: {
+      unleaded: { NSW: 244, VIC: 250, QLD: 245, SA: 260, WA: 248, TAS: 260, NT: 274, ACT: 258 },
+      diesel:   { NSW: 252, VIC: 258, QLD: 253, SA: 268, WA: 256, TAS: 268, NT: 282, ACT: 266 }
+    }
+  };
+
+  const COMMUTE_DISTANCES = { NSW: 28, VIC: 30, QLD: 33, SA: 30, WA: 29, TAS: 25, NT: 25, ACT: 12 };
+
+  const CAR_SIZES = {
+    small:  6.5,
+    medium: 7.5,
+    large:  9.5,
+    suv:    9.5
+  };
+
+  const WEEKS_PER_MONTH = 4.33;
+
+  // === DOM REFS ===
+  const $ = id => document.getElementById(id);
+  const stateEl = $('state');
+  const fuelRadios = document.querySelectorAll('input[name="fuelType"]');
+  const carSizeEl = $('carSize');
+  const distanceEl = $('distance');
+  const bothWaysEl = $('bothWays');
+  const daysWorkingEl = $('daysWorking');
+  const wfhNormalEl = $('wfhNormal');
+  const wfhExtraEl = $('wfhExtra');
+  const febPriceEl = $('febPrice');
+  const currentPriceEl = $('currentPrice');
+
+  // Track if user has manually edited price fields
+  let febPriceEdited = false;
+  let currentPriceEdited = false;
+
+  // === HELPERS ===
+  const fmt = n => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(n);
+
+  function getFuelType() {
+    return document.querySelector('input[name="fuelType"]:checked').value;
+  }
+
+  function updateDefaults() {
+    const state = stateEl.value;
+    const fuelType = getFuelType();
+
+    distanceEl.value = COMMUTE_DISTANCES[state];
+
+    if (!febPriceEdited) {
+      febPriceEl.value = FUEL_PRICES.feb2025[fuelType][state];
+    }
+    if (!currentPriceEdited) {
+      currentPriceEl.value = FUEL_PRICES.current[fuelType][state];
+    }
+  }
+
+  function clampWfhOptions() {
+    const daysWorking = parseInt(daysWorkingEl.value);
+    const wfhNormal = parseInt(wfhNormalEl.value);
+
+    // Clamp WFH normal
+    if (wfhNormal >= daysWorking) {
+      wfhNormalEl.value = Math.max(0, daysWorking - 1);
+    }
+
+    // Update max for extra WFH
+    const remaining = daysWorking - parseInt(wfhNormalEl.value);
+    const wfhExtra = parseInt(wfhExtraEl.value);
+    if (wfhExtra > remaining) {
+      wfhExtraEl.value = remaining;
+    }
+  }
+
+  // === CORE CALCULATION ===
+  function calculate() {
+    clampWfhOptions();
+
+    const state = stateEl.value;
+    const fuelType = getFuelType();
+    const consumption = CAR_SIZES[carSizeEl.value]; // L/100km
+    const distance = parseFloat(distanceEl.value) || 0;
+    const bothWays = bothWaysEl.checked;
+    const daysWorking = parseInt(daysWorkingEl.value);
+    const wfhNormal = parseInt(wfhNormalEl.value);
+    const wfhExtra = parseInt(wfhExtraEl.value);
+    const febPrice = parseFloat(febPriceEl.value) || 0; // c/L
+    const currentPrice = parseFloat(currentPriceEl.value) || 0; // c/L
+
+    const tripKm = bothWays ? distance * 2 : distance;
+    const litresPerTrip = (tripKm / 100) * consumption;
+
+    const commuteDaysNormal = Math.max(0, daysWorking - wfhNormal);
+    const commuteDaysWithWfh = Math.max(0, daysWorking - wfhNormal - wfhExtra);
+
+    // February costs (normal commuting pattern)
+    const febDailyCost = litresPerTrip * (febPrice / 100);
+    const febWeeklyCost = febDailyCost * commuteDaysNormal;
+    const febMonthlyCost = febWeeklyCost * WEEKS_PER_MONTH;
+
+    // Current costs (normal commuting pattern)
+    const nowDailyCost = litresPerTrip * (currentPrice / 100);
+    const nowWeeklyCost = nowDailyCost * commuteDaysNormal;
+    const nowMonthlyCost = nowWeeklyCost * WEEKS_PER_MONTH;
+
+    // Current costs WITH extra WFH
+    const wfhWeeklyCost = nowDailyCost * commuteDaysWithWfh;
+    const wfhMonthlyCost = wfhWeeklyCost * WEEKS_PER_MONTH;
+
+    // Key metrics
+    const monthlyIncrease = nowMonthlyCost - febMonthlyCost;
+    const weeklyIncrease = nowWeeklyCost - febWeeklyCost;
+    const dailyIncrease = nowDailyCost - febDailyCost;
+
+    const wfhWeeklySaving = nowWeeklyCost - wfhWeeklyCost;
+    const wfhMonthlySaving = nowMonthlyCost - wfhMonthlyCost;
+    const wfhAnnualSaving = wfhMonthlySaving * 12;
+
+    // === UPDATE DOM ===
+
+    // Hero stats
+    $('heroIncrease').textContent = fmt(monthlyIncrease);
+    $('heroSavingsLabel').textContent = wfhExtra > 0
+      ? `WFH ${wfhExtra} Extra Day${wfhExtra > 1 ? 's' : ''} Saves`
+      : 'No Extra WFH Days Selected';
+    $('heroSavings').textContent = wfhExtra > 0 ? fmt(wfhMonthlySaving) : fmt(0);
+    $('heroSavingsSub').textContent = wfhExtra > 0
+      ? `per month (${fmt(wfhAnnualSaving)}/year)`
+      : 'Add extra WFH days above to see savings';
+
+    const savingsCard = $('heroSavingsCard');
+    savingsCard.classList.toggle('no-extra-wfh', wfhExtra === 0);
+
+    // Price tags
+    const fuelLabel = fuelType === 'unleaded' ? 'Unleaded' : 'Diesel';
+    $('febPriceTag').textContent = `${febPrice} c/L ${fuelLabel}`;
+    $('currentPriceTag').textContent = `${currentPrice} c/L ${fuelLabel}`;
+
+    // Comparison cards
+    $('febDaily').textContent = fmt(febDailyCost);
+    $('febWeekly').textContent = fmt(febWeeklyCost);
+    $('febMonthly').textContent = fmt(febMonthlyCost);
+
+    $('nowDaily').textContent = fmt(nowDailyCost);
+    $('nowWeekly').textContent = fmt(nowWeeklyCost);
+    $('nowMonthly').textContent = fmt(nowMonthlyCost);
+
+    // WFH Scenario
+    const wfhSection = $('wfhScenario');
+    if (wfhExtra > 0) {
+      wfhSection.style.display = '';
+      $('wfhTitle').textContent = `If You Worked From Home ${wfhExtra} Extra Day${wfhExtra > 1 ? 's' : ''} Per Week`;
+      $('wfhWeekly').textContent = fmt(wfhWeeklySaving);
+      $('wfhWeeklyDetail').textContent = `${fmt(wfhWeeklyCost)} vs ${fmt(nowWeeklyCost)}`;
+      $('wfhMonthly').textContent = fmt(wfhMonthlySaving);
+      $('wfhMonthlyDetail').textContent = `${fmt(wfhMonthlyCost)} vs ${fmt(nowMonthlyCost)}`;
+      $('wfhAnnual').textContent = fmt(wfhAnnualSaving);
+      $('wfhAnnualDetail').textContent = `Over 12 months`;
+    } else {
+      wfhSection.style.display = 'none';
+    }
+
+    // Bar chart
+    const bars = [
+      { label: 'Feb 2025 (commuting)', value: febMonthlyCost, cls: 'feb' },
+      { label: 'Now (commuting)', value: nowMonthlyCost, cls: 'now' },
+    ];
+    if (wfhExtra > 0) {
+      bars.push({ label: `Now (with WFH +${wfhExtra})`, value: wfhMonthlyCost, cls: 'wfh' });
+    }
+
+    const maxVal = Math.max(...bars.map(b => b.value), 1);
+    const chartHtml = bars.map(b => {
+      const pct = Math.max((b.value / maxVal) * 100, 5);
+      return `
+        <div class="bar-row">
+          <div class="bar-label">${b.label}</div>
+          <div class="bar-track">
+            <div class="bar-fill ${b.cls}" style="width:${pct}%">${pct > 25 ? fmt(b.value) : ''}</div>
+          </div>
+          ${pct <= 25 ? `<div class="bar-value-outside">${fmt(b.value)}</div>` : '<div class="bar-value-outside"></div>'}
+        </div>`;
+    }).join('');
+    $('chartBars').innerHTML = chartHtml;
+
+    // Summary table
+    $('tFebDaily').textContent = fmt(febDailyCost);
+    $('tFebWeekly').textContent = fmt(febWeeklyCost);
+    $('tFebMonthly').textContent = fmt(febMonthlyCost);
+
+    $('tNowDaily').textContent = fmt(nowDailyCost);
+    $('tNowWeekly').textContent = fmt(nowWeeklyCost);
+    $('tNowMonthly').textContent = fmt(nowMonthlyCost);
+
+    $('tIncDaily').textContent = `+${fmt(dailyIncrease)}`;
+    $('tIncWeekly').textContent = `+${fmt(weeklyIncrease)}`;
+    $('tIncMonthly').textContent = `+${fmt(monthlyIncrease)}`;
+
+    if (wfhExtra > 0) {
+      $('tWfhDaily').textContent = fmt(nowDailyCost);
+      $('tWfhWeekly').textContent = fmt(wfhWeeklyCost);
+      $('tWfhMonthly').textContent = fmt(wfhMonthlyCost);
+      $('tSavDaily').textContent = '\u2014';
+      $('tSavWeekly').textContent = `-${fmt(wfhWeeklySaving)}`;
+      $('tSavMonthly').textContent = `-${fmt(wfhMonthlySaving)}`;
+    } else {
+      $('tWfhDaily').textContent = '\u2014';
+      $('tWfhWeekly').textContent = '\u2014';
+      $('tWfhMonthly').textContent = '\u2014';
+      $('tSavDaily').textContent = '\u2014';
+      $('tSavWeekly').textContent = '\u2014';
+      $('tSavMonthly').textContent = '\u2014';
+    }
+  }
+
+  // === EVENT LISTENERS ===
+  stateEl.addEventListener('change', () => {
+    febPriceEdited = false;
+    currentPriceEdited = false;
+    updateDefaults();
+    calculate();
+  });
+
+  fuelRadios.forEach(r => r.addEventListener('change', () => {
+    febPriceEdited = false;
+    currentPriceEdited = false;
+    updateDefaults();
+    calculate();
+  }));
+
+  febPriceEl.addEventListener('input', () => { febPriceEdited = true; calculate(); });
+  currentPriceEl.addEventListener('input', () => { currentPriceEdited = true; calculate(); });
+
+  [carSizeEl, distanceEl, bothWaysEl, daysWorkingEl, wfhNormalEl, wfhExtraEl].forEach(el => {
+    el.addEventListener('change', calculate);
+    el.addEventListener('input', calculate);
+  });
+
+  // === INIT ===
+  updateDefaults();
+  calculate();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "fuel-calculator-au",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx wrangler pages dev . --port 8080",
+    "deploy": "npx wrangler pages deploy . --project-name=fuel-calculator-au"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}

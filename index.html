@@ -300,6 +300,8 @@
       margin-top: 28px;
     }
 
+    .hero-stats.single { grid-template-columns: 1fr; }
+
     .hero-stat {
       border-radius: var(--radius);
       padding: 28px;
@@ -326,12 +328,6 @@
       box-shadow: 0 8px 24px rgba(30, 41, 59, 0.25);
     }
 
-    .hero-stat.wfh-savings {
-      background: linear-gradient(145deg, #059669 0%, #10b981 100%);
-      color: white;
-      box-shadow: 0 8px 24px rgba(5, 150, 105, 0.25);
-    }
-
     .hero-stat .hero-label {
       font-size: 0.72rem;
       font-weight: 700;
@@ -353,11 +349,6 @@
       opacity: 0.7;
       margin-top: 8px;
       font-weight: 500;
-    }
-
-    .hero-stat.wfh-savings.no-extra-wfh {
-      background: linear-gradient(145deg, #475569 0%, #64748b 100%);
-      box-shadow: 0 8px 24px rgba(71, 85, 105, 0.2);
     }
 
     /* Comparison Cards */
@@ -480,7 +471,6 @@
 
     .bar-fill.feb { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
     .bar-fill.now { background: linear-gradient(90deg, #475569, #64748b); }
-    .bar-fill.wfh { background: linear-gradient(90deg, #059669, #10b981); }
 
     .bar-value-outside {
       font-size: 0.8rem;
@@ -527,11 +517,6 @@
       font-weight: 700;
     }
 
-    .summary-table .savings {
-      color: var(--green-dark);
-      font-weight: 700;
-    }
-
     /* Footer */
     footer {
       padding: 32px 0;
@@ -575,7 +560,7 @@
   <div class="container">
     <div class="badge"><span class="dot"></span> Live Calculator</div>
     <h1>How much more are you<br>actually paying for fuel?</h1>
-    <p>See the real daily impact of fuel price changes on your commute and what working from home could save you.</p>
+    <p>Enter your commute details and see the actual extra cost of the recent fuel price increases.</p>
   </div>
 </header>
 
@@ -632,41 +617,15 @@
         </div>
 
         <div class="input-group">
-          <label for="daysWorking">Days Working Per Week</label>
-          <select id="daysWorking">
+          <label for="daysInOffice">Days in the Office Per Week</label>
+          <select id="daysInOffice">
             <option value="1">1</option>
             <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="3" selected>3</option>
             <option value="4">4</option>
-            <option value="5" selected>5</option>
+            <option value="5">5</option>
             <option value="6">6</option>
             <option value="7">7</option>
-          </select>
-        </div>
-
-        <div class="input-group">
-          <label for="wfhNormal">Days WFH Currently</label>
-          <span class="hint">How many days you already work from home</span>
-          <select id="wfhNormal">
-            <option value="0">0</option>
-            <option value="1">1</option>
-            <option value="2" selected>2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
-        </div>
-
-        <div class="input-group">
-          <label for="wfhExtra">Extra WFH Days (Proposed)</label>
-          <span class="hint">Additional days you'd like to work from home</span>
-          <select id="wfhExtra">
-            <option value="0">0</option>
-            <option value="1">1</option>
-            <option value="2" selected>2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
           </select>
         </div>
 
@@ -694,17 +653,12 @@
       </div>
     </div>
 
-    <!-- HERO STATS -->
-    <div class="hero-stats" aria-live="polite">
+    <!-- HERO STAT -->
+    <div class="hero-stats single" aria-live="polite">
       <div class="hero-stat cost-increase">
         <div class="hero-label">The fuel price increase adds</div>
         <div class="hero-value" id="heroIncrease">$0</div>
         <div class="hero-sub" id="heroIncreaseSub">per day to your commute</div>
-      </div>
-      <div class="hero-stat wfh-savings" id="heroSavingsCard">
-        <div class="hero-label" id="heroSavingsLabel">WFH 2 Extra Days Saves</div>
-        <div class="hero-value" id="heroSavings">$0</div>
-        <div class="hero-sub" id="heroSavingsSub">per day</div>
       </div>
     </div>
 
@@ -756,19 +710,9 @@
               <td id="tNowWeekly">$0</td>
             </tr>
             <tr>
-              <td>Difference</td>
+              <td>Extra cost from price rise</td>
               <td class="increase" id="tIncDaily">+$0</td>
               <td class="increase" id="tIncWeekly">+$0</td>
-            </tr>
-            <tr id="tWfhRow">
-              <td id="tWfhLabel">With extra WFH</td>
-              <td id="tWfhDaily">&mdash;</td>
-              <td id="tWfhWeekly">$0</td>
-            </tr>
-            <tr id="tSavRow">
-              <td>WFH saving</td>
-              <td class="savings" id="tSavDaily">&mdash;</td>
-              <td class="savings" id="tSavWeekly">-$0</td>
             </tr>
           </tbody>
         </table>
@@ -811,9 +755,7 @@
   const carSizeEl = $('carSize');
   const distanceEl = $('distance');
   const bothWaysEl = $('bothWays');
-  const daysWorkingEl = $('daysWorking');
-  const wfhNormalEl = $('wfhNormal');
-  const wfhExtraEl = $('wfhExtra');
+  const daysInOfficeEl = $('daysInOffice');
   const febPriceEl = $('febPrice');
   const currentPriceEl = $('currentPrice');
 
@@ -839,72 +781,33 @@
     }
   }
 
-  function clampWfhOptions() {
-    const daysWorking = parseInt(daysWorkingEl.value);
-    const wfhNormal = parseInt(wfhNormalEl.value);
-
-    if (wfhNormal >= daysWorking) {
-      wfhNormalEl.value = Math.max(0, daysWorking - 1);
-    }
-
-    const remaining = daysWorking - parseInt(wfhNormalEl.value);
-    const wfhExtra = parseInt(wfhExtraEl.value);
-    if (wfhExtra > remaining) {
-      wfhExtraEl.value = remaining;
-    }
-  }
-
   // === CORE CALCULATION ===
   function calculate() {
-    clampWfhOptions();
-
     const fuelType = getFuelType();
     const consumption = CAR_SIZES[carSizeEl.value];
     const distance = parseFloat(distanceEl.value) || 0;
     const bothWays = bothWaysEl.checked;
-    const daysWorking = parseInt(daysWorkingEl.value);
-    const wfhNormal = parseInt(wfhNormalEl.value);
-    const wfhExtra = parseInt(wfhExtraEl.value);
+    const daysInOffice = parseInt(daysInOfficeEl.value);
     const febPrice = parseFloat(febPriceEl.value) || 0;
     const currentPrice = parseFloat(currentPriceEl.value) || 0;
 
     const tripKm = bothWays ? distance * 2 : distance;
     const litresPerTrip = (tripKm / 100) * consumption;
 
-    const commuteDaysNormal = Math.max(0, daysWorking - wfhNormal);
-    const commuteDaysWithWfh = Math.max(0, daysWorking - wfhNormal - wfhExtra);
-
     const febDailyCost = litresPerTrip * (febPrice / 100);
-    const febWeeklyCost = febDailyCost * commuteDaysNormal;
+    const febWeeklyCost = febDailyCost * daysInOffice;
 
     const nowDailyCost = litresPerTrip * (currentPrice / 100);
-    const nowWeeklyCost = nowDailyCost * commuteDaysNormal;
-
-    const wfhWeeklyCost = nowDailyCost * commuteDaysWithWfh;
+    const nowWeeklyCost = nowDailyCost * daysInOffice;
 
     const dailyIncrease = nowDailyCost - febDailyCost;
     const weeklyIncrease = nowWeeklyCost - febWeeklyCost;
 
-    const wfhWeeklySaving = nowWeeklyCost - wfhWeeklyCost;
-    const wfhDailySaving = wfhExtra > 0 ? nowDailyCost : 0;
-
     // === UPDATE DOM ===
 
-    // Hero stats
+    // Hero stat
     $('heroIncrease').textContent = fmt(dailyIncrease);
-    $('heroIncreaseSub').textContent = `per day to your commute (${fmt(weeklyIncrease)}/week)`;
-
-    if (wfhExtra > 0) {
-      $('heroSavingsLabel').textContent = `WFH ${wfhExtra} extra day${wfhExtra > 1 ? 's' : ''} saves`;
-      $('heroSavings').textContent = fmt(wfhWeeklySaving);
-      $('heroSavingsSub').textContent = `per week (${fmt(wfhDailySaving)}/day not driving)`;
-    } else {
-      $('heroSavingsLabel').textContent = 'No extra WFH days selected';
-      $('heroSavings').textContent = fmt(0);
-      $('heroSavingsSub').textContent = 'Add extra WFH days above to see savings';
-    }
-
-    $('heroSavingsCard').classList.toggle('no-extra-wfh', wfhExtra === 0);
+    $('heroIncreaseSub').textContent = `extra per day you drive in (${fmt(weeklyIncrease)}/week across ${daysInOffice} day${daysInOffice > 1 ? 's' : ''})`;
 
     // Price tags
     const fuelLabel = fuelType === 'unleaded' ? 'Unleaded' : 'Diesel';
@@ -922,9 +825,6 @@
       { label: 'Feb 2025', value: febWeeklyCost, cls: 'feb' },
       { label: 'Current', value: nowWeeklyCost, cls: 'now' },
     ];
-    if (wfhExtra > 0) {
-      bars.push({ label: `With +${wfhExtra} WFH`, value: wfhWeeklyCost, cls: 'wfh' });
-    }
 
     const maxVal = Math.max(...bars.map(b => b.value), 1);
     $('chartBars').innerHTML = bars.map(b => {
@@ -946,19 +846,6 @@
     $('tNowWeekly').textContent = fmt(nowWeeklyCost);
     $('tIncDaily').textContent = `+${fmt(dailyIncrease)}`;
     $('tIncWeekly').textContent = `+${fmt(weeklyIncrease)}`;
-
-    if (wfhExtra > 0) {
-      $('tWfhRow').style.display = '';
-      $('tSavRow').style.display = '';
-      $('tWfhLabel').textContent = `With +${wfhExtra} WFH day${wfhExtra > 1 ? 's' : ''}`;
-      $('tWfhDaily').textContent = fmt(nowDailyCost);
-      $('tWfhWeekly').textContent = fmt(wfhWeeklyCost);
-      $('tSavDaily').textContent = '\u2014';
-      $('tSavWeekly').textContent = `-${fmt(wfhWeeklySaving)}`;
-    } else {
-      $('tWfhRow').style.display = 'none';
-      $('tSavRow').style.display = 'none';
-    }
   }
 
   // === EVENT LISTENERS ===
@@ -979,7 +866,7 @@
   febPriceEl.addEventListener('input', () => { febPriceEdited = true; calculate(); });
   currentPriceEl.addEventListener('input', () => { currentPriceEdited = true; calculate(); });
 
-  [carSizeEl, distanceEl, bothWaysEl, daysWorkingEl, wfhNormalEl, wfhExtraEl].forEach(el => {
+  [carSizeEl, distanceEl, bothWaysEl, daysInOfficeEl].forEach(el => {
     el.addEventListener('change', calculate);
     el.addEventListener('input', calculate);
   });
